@@ -12,8 +12,6 @@ export default function Layout({ children }) {
             <div>
               <Link href="/" className="mr-6 hover:text-gray-300">Home</Link>
               <Link href="/about" className="mr-6 hover:text-gray-300">About</Link>
-              <Link href="/notes" className="mr-6 hover:text-gray-300">Notes</Link>
-              <Link href="/upload" className="mr-6 hover:text-gray-300">Upload</Link>
               <Link href="/login" className="hover:text-gray-300">Login</Link>
             </div>
           </div>
