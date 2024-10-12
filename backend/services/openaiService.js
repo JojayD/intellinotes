@@ -1,33 +1,35 @@
-const axios = require("axios");
+// Import and Initialize OpenAI Library
+const OpenAI = require("openai");
 const dotenv = require("dotenv");
-dotenv.config();
+dotenv.config({ path: require('path').resolve(__dirname, '../../.env') });  // Make sure the path is correct
 
-const apiKey = process.env.OPENAI_API_KEY;
-const apiUrl = "https://api.openai.com/v1/chat/completions";
+console.log("OpenAI API Key:", process.env.OPENAI_API_KEY);
+const openai = new OpenAI({
+	apiKey: process.env.OPENAI_API_KEY,
+});
 
+// Function to get response from OpenAI
 const getChatGPTResponse = async (prompt) => {
 	try {
-		const completion = await axios.post(
-			apiUrl,
-			{
-				model: "gpt-4o-mini",
-				messages: [
-					{ role: "system", content: "You are a helpful assistant." },
-					{ role: "user", content: prompt },
-				],
-			},
-			{
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${apiKey}`,
-				},
-			}
-		);
+		const completion = await openai.chat.completions.create({
+			model: "gpt-4o-mini",
+			messages: [
+				{ role: "system", content: "You are a helpful assistant." },
+				{ role: "user", content: prompt },
+			],
+		});
 
-		return completion.data.choices[0].message.content.trim();
+		return completion.choices[0].message.content;
 	} catch (error) {
+		console.error("Error fetching ChatGPT response:", error.message);
 		throw new Error("Error fetching ChatGPT response");
 	}
 };
 
-module.exports = { getChatGPTResponse };
+// Example usage
+(async () => {
+	const response = await getChatGPTResponse(
+		"Write a haiku about recursion in programming."
+	);
+	console.log(response);
+})();
