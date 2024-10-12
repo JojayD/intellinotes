@@ -1,9 +1,17 @@
 "use client";  // Required for client-side functionality
 
 import { useState } from 'react';
+import Link from 'next/link';  // Import Next.js Link component for navigation
 
 export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Sample notes array with id, title, and date
+  const notes = [
+    { id: 1, title: 'Math Lecture Notes', date: 'Oct 1, 2024' },
+    { id: 2, title: 'AI Class Notes', date: 'Oct 5, 2024' },
+    // Add more notes as needed
+  ];
 
   // Function to open and close modal
   const openModal = () => setIsModalOpen(true);
@@ -30,19 +38,17 @@ export default function Dashboard() {
       <main className="flex-grow p-8">
         <h1 className="text-4xl font-bold text-gray-700 mb-8">Your Notes</h1>
 
-        {/* Placeholder for notes */}
+        {/* Notes Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-6 bg-white shadow-md rounded-lg hover:shadow-xl transition">
-            <h3 className="text-xl font-semibold text-gray-800">Math Lecture Notes</h3>
-            <p className="text-sm text-gray-500">Oct 1, 2024</p>
-            <button className="mt-4 text-blue-500 hover:underline">View/Edit</button>
-          </div>
-          <div className="p-6 bg-white shadow-md rounded-lg hover:shadow-xl transition">
-            <h3 className="text-xl font-semibold text-gray-800">AI Class Notes</h3>
-            <p className="text-sm text-gray-500">Oct 5, 2024</p>
-            <button className="mt-4 text-blue-500 hover:underline">View/Edit</button>
-          </div>
-          {/* Add more note cards here */}
+          {notes.map(note => (
+            <div key={note.id} className="p-6 bg-white shadow-md rounded-lg hover:shadow-xl transition">
+              <h3 className="text-xl font-semibold text-gray-800">{note.title}</h3>
+              <p className="text-sm text-gray-500">{note.date}</p>
+              <Link href={`/notes/${note.id}`} className="mt-4 text-blue-500 hover:underline">
+                View/Edit
+              </Link>
+            </div>
+          ))}
         </div>
       </main>
 
