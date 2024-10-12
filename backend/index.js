@@ -3,18 +3,24 @@ const openaiRoutes = require("./routes/openaiRoutes");
 const authRoutes = require("../backend/routes/openaiRoutes"); // Import auth routes
 const app = express();
 const port = 3000;
-
+const fetch = require("node-fetch");
+const twelvelabsRoutes = require("./routes/twelvelabsRoutes"); // Import Twelve Labs routes
+app.use(fetch)
 app.use(express.json());
-app.use("/api", openaiRoutes);
+app.use("/twelvelabsAPI", twelvelabsRoutes); // Use Twelve Labs routes
+app.use("/openAiAPI", openaiRoutes);
 app.use("/auth", authRoutes); // Use auth routes
 
 app.get("/", (req, res) => {
 	res.send("Hello World!");
 });
 
-app.
 app.listen(port, () => {
 	console.log(`Server is running at http://localhost:${port}`);
+});
+
+app.get("/", (req, res) => {
+	
 });
 
 console.log("Hello, World!");
