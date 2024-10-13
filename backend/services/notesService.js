@@ -24,17 +24,35 @@ async function createNote(userId, title, content) {
 
 async function getAllNotes(userId) {
   try {
-    const notesSnapshot = await notesCollection.where("userId", "==", userId).get();
+    // Reference to the user document
+    const userDocRef = firestore.collection("users").doc(userId);
+
+    console.log("Fetching notes for user ID:", userId);
+
+    // Reference to the sub-collection "notes" inside the user document
+    const notesSnapshot = await userDocRef.collection("notes").get();
+
+    console.log("Snapshot size:", notesSnapshot.size);  // Log the number of documents returned
+
+    if (notesSnapshot.empty) {
+      console.log("No notes found for user ID:", userId);  // Log if no notes are found
+      return [];
+    }
+
     const notes = [];
     notesSnapshot.forEach((doc) => {
       notes.push({ id: doc.id, ...doc.data() });
     });
+
+    console.log("Fetched notes:", notes);  // Log the fetched notes
     return notes;
   } catch (error) {
-    console.error("Error fetching notes:", error);
+    console.error("Error fetching notes:", error);  // Log any errors
     throw new Error("Failed to fetch notes.");
   }
 }
+
+
 
 async function getNoteById(userId, noteId) {
   try {

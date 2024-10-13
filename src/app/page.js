@@ -1,4 +1,7 @@
+"use client";
+
 import React from 'react'; // Import React
+import Link from 'next/link'; // Import Link for navigation
 
 // Define the Home component
 export default function Home() {
@@ -9,9 +12,13 @@ export default function Home() {
         <div className="container mx-auto text-center">
           <h1 className="text-5xl font-bold">Welcome to Intellinotes</h1>
           <p className="mt-4 text-lg">Your AI-driven solution for interactive note-taking</p>
-          <button className="mt-8 px-8 py-3 bg-green-500 text-white rounded-lg hover:bg-green-700 transition">
-            Get Started
-          </button>
+          <Link href="/login">
+            <button
+              className="mt-8 px-8 py-3 bg-green-500 text-white rounded-lg hover:bg-green-700 transition"
+            >
+              Get Started
+            </button>
+          </Link>
         </div>
       </section>
 
