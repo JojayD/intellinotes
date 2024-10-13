@@ -37,7 +37,7 @@ export default function Dashboard() {
     try {
       const idToken = await firebaseUser.getIdToken();
       console.log("Fetching notes for UID:", firebaseUser.uid); // Add this log
-      const response = await axios.get("http://localhost:3001/api/notes", {
+      const response = await axios.get("http://localhost:3001/notes", {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
