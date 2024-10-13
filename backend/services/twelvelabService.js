@@ -73,7 +73,7 @@ const uploadVideo = async (indexId, filePath) => {
     });
 
     console.log(`Created task: id=${task.id}`);
-    await task.waitForDone(300, (task) => {
+    await task.waitForDone(5000, (task) => {
       console.log(`  Status=${task.status}`);
     });
 
