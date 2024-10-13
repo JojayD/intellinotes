@@ -1,30 +1,46 @@
-const { createIndex } = require('../services/twelvelabService');
+// backend/controllers/twelvelabsController.js
 
-const createIndexController = async (req, res) => {
-  const { indexName } = req.body;
+const admin = require('../firebase/firebaseAdmin'); // Adjusted path
+const { uploadVideoToIndex } = require('../services/twelvelabService');
+const fs = require('fs');
+
+async function uploadVideoController(req, res) {
+  const userId = req.user.uid; // Firebase UID
+  const videoFile = req.file;
+
+  if (!videoFile) {
+    return res.status(400).json({ error: 'No video file uploaded' });
+  }
+
   try {
-    const createdIndex = await createIndex(indexName);
+    // Retrieve user's indexId from Firestore
+    const userDoc = await admin.firestore().collection('users').doc(userId).get();
+    if (!userDoc.exists) {
+      return res.status(400).json({ error: 'User not found' });
+    }
+    const userData = userDoc.data();
+    const indexId = userData.indexId;
 
-    console.log(`ID: ${createdIndex.id}`);
-    console.log(`Name: ${createdIndex.name}`);
-    console.log("Engines:");
-    createdIndex.engines.forEach((engine, index) => {
-      console.log(`  Engine ${index + 1}:`);
-      console.log(`    Name: ${engine.name}`);
-      console.log(`    Options: ${JSON.stringify(engine.options)}`);
-    });
-    console.log(`Video count: ${createdIndex.videoCount}`);
-    console.log(`Total duration: ${createdIndex.totalDuration} seconds`);
-    console.log(`Created at: ${createdIndex.createdAt}`);
-    if (createdIndex.updatedAt) {
-      console.log(`Updated at: ${createdIndex.updatedAt}`);
+    if (!indexId) {
+      return res.status(400).json({ error: 'User index not found' });
     }
 
-    res.json(createdIndex); // Send the created index as a response
-  } catch (error) {
-    console.error('Error creating index:', error);
-    res.status(500).json({ error: 'Failed to create index' });
-  }
-};
+    const videoFilePath = videoFile.path;
 
-module.exports = { createIndexController };
+    // Upload the video to the user's index
+    const taskResponse = await uploadVideoToIndex(indexId, videoFilePath);
+    const taskId = taskResponse._id;
+
+    res.status(201).json({ taskId });
+  } catch (error) {
+    console.error('Error uploading video:', error);
+    res.status(500).json({ error: 'Failed to upload video' });
+  } finally {
+    // Clean up the uploaded file
+    fs.unlinkSync(videoFile.path);
+  }
+}
+
+module.exports = {
+  uploadVideoController,
+};

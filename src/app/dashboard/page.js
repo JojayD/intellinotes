@@ -1,10 +1,38 @@
+// src/app/dashboard/page.js
+
 "use client";  // Required for client-side functionality
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';  // Import Next.js Link component for navigation
+import axios from 'axios'; // Import axios for HTTP requests
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import firebaseApp from '../../../src/firebase'; // Adjust the path based on your directory structure
 
 export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [videoFile, setVideoFile] = useState(null);   // State to store the selected video file
+  const [uploading, setUploading] = useState(false);  // State to indicate uploading status
+  const [user, setUser] = useState(null);             // State to store the authenticated user
+
+  // Initialize Firebase Auth
+  const auth = getAuth(firebaseApp);
+
+  // Handle user authentication state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
+      } else {
+        // Redirect to login page or handle unauthenticated state
+        setUser(null);
+        // For example, redirect to login:
+        // router.push('/login');
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, [auth]);
 
   // Sample notes array with id, title, and date
   const notes = [
@@ -15,7 +43,71 @@ export default function Dashboard() {
 
   // Function to open and close modal
   const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setVideoFile(null); // Reset the file input when modal is closed
+  };
+
+  // Function to handle file input change
+  const handleFileChange = (e) => {
+    setVideoFile(e.target.files[0]);
+  };
+
+  // Function to get the Firebase ID token
+  const getIdToken = async () => {
+    if (user) {
+      return await user.getIdToken();
+    } else {
+      return null;
+    }
+  };
+
+  // Function to upload video
+  const handleUpload = async () => {
+    if (!videoFile) {
+      alert('Please select a video file.');
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      // Get Firebase ID token
+      const idToken = await getIdToken();
+      if (!idToken) {
+        alert('User is not authenticated');
+        setUploading(false);
+        return;
+      }
+
+      // Prepare FormData
+      const formData = new FormData();
+      formData.append('video', videoFile);
+
+      // Send request to backend
+      const uploadResponse = await axios.post(
+        'http://localhost:3001/twelvelabsAPI/upload-video',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${idToken}`,
+          },
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
+        }
+      );
+
+      console.log('Video uploaded:', uploadResponse.data);
+      alert('Video uploaded successfully!');
+      closeModal();
+    } catch (error) {
+      console.error('Error uploading video:', error);
+      alert('Failed to upload video. Please try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -40,8 +132,11 @@ export default function Dashboard() {
 
         {/* Notes Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {notes.map(note => (
-            <div key={note.id} className="p-6 bg-white shadow-md rounded-lg hover:shadow-xl transition">
+          {notes.map((note) => (
+            <div
+              key={note.id}
+              className="p-6 bg-white shadow-md rounded-lg hover:shadow-xl transition"
+            >
               <h3 className="text-xl font-semibold text-gray-800">{note.title}</h3>
               <p className="text-sm text-gray-500">{note.date}</p>
               <Link href={`/notes/${note.id}`} className="mt-4 text-blue-500 hover:underline">
@@ -60,17 +155,23 @@ export default function Dashboard() {
             <input
               type="file"
               accept="video/*"
+              onChange={handleFileChange}
               className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <div className="mt-6 flex justify-end">
               <button
                 onClick={closeModal}
+                disabled={uploading}
                 className="bg-red-500 text-white px-5 py-2 rounded-md hover:bg-red-600 transition mr-3"
               >
                 Cancel
               </button>
-              <button className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition">
-                Upload
+              <button
+                onClick={handleUpload}
+                disabled={uploading}
+                className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition"
+              >
+                {uploading ? 'Uploading...' : 'Upload'}
               </button>
             </div>
           </div>
