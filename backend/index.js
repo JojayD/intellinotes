@@ -2,10 +2,8 @@ const express = require("express");
 const openaiRoutes = require("./routes/openaiRoutes");
 const authRoutes = require("../backend/routes/openaiRoutes"); // Import auth routes
 const app = express();
-const port = 3000;
-const fetch = require("node-fetch");
+const port = 3001;
 const twelvelabsRoutes = require("./routes/twelvelabsRoutes"); // Import Twelve Labs routes
-app.use(fetch)
 app.use(express.json());
 app.use("/twelvelabsAPI", twelvelabsRoutes); // Use Twelve Labs routes
 app.use("/openAiAPI", openaiRoutes);

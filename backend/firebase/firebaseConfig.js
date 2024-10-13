@@ -19,7 +19,13 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const auth = getAuth(app);
+let analytics;
+if (typeof window !== 'undefined') {
+  // Dynamically import getAnalytics
+  import('firebase/analytics').then(({ getAnalytics }) => {
+    analytics = getAnalytics(app);
+  });
+}
 
-export { auth };
+export { app, auth };
