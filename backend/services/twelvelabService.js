@@ -1,40 +1,59 @@
-const axios = require('axios');
-const dotenv = require('dotenv');
-dotenv.config({ path: require('path').resolve(__dirname, '../../.env') });  // Ensure the path is correct
+const axios = require("axios");
+const dotenv = require("dotenv");
+dotenv.config({ path: require("path").resolve(__dirname, "../../.env") }); // Ensure the path is correct
 
-const TWELVELABS_API_URL = 'https://api.twelvelabs.io/insights'; // Replace with the actual API endpoint from Twelve Labs
+const TWELVELABS_API_URL = "https://api.twelvelabs.io/insights"; // Replace with the actual API endpoint from Twelve Labs
 const TWELVELABS_API_KEY = process.env.TWELVELABS_API_KEY;
 
+const fetch = require("node-fetch");
 const createIndex = async (indexName) => {
-  try {
-    const response = await axios.post(
-      `${TWELVELABS_API_URL}/indexes`, // Replace with the actual endpoint for creating an index
-      {
-        name: indexName,
-        engines: [
-          {
-            name: "marengo2.6",
-            options: ["visual", "conversation", "text_in_video"],
-          },
-        ],
-        addons: ["thumbnail"],
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${TWELVELABS_API_KEY}`,
-        },
-      }
-    );
+	const url = "https://api.twelvelabs.io/v1.2/indexes";
+	const options = {
+		method: "POST",
+		headers: {
+			accept: "application/json",
+			"x-api-key": process.env.TWELVELABS_API_KEY,
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			index_name: indexName,
+			engines: [
+				{
+					engine_options: ["visual", "text_in_video", "logo"],
+					engine_name: "marengo2.6",
+				},
+			],
+		}),
+	};
 
-    return response.data;
-  } catch (error) {
-    throw new Error(`Error creating index: ${error.message}`);
-  }
+	fetch(url, options)
+		.then((res) => res.json())
+		.then((json) => console.log(json))
+		.catch((err) => console.error("error:" + err));
 };
 
-const getVideoInsights = async (videoUrl) => {
-  // Your existing getVideoInsights function implementation
-};
+const retrieveListIndex = async ()=>{
+  const fetch = require("node-fetch");
 
-module.exports = { createIndex, getVideoInsights };
+		const url =
+			"https://api.twelvelabs.io/v1.2/indexes?page=1&page_limit=10&sort_by=created_at&sort_option=desc&engine_family=marengo";
+		const options = {
+			method: "GET",
+			headers: {
+				accept: "application/json",
+				"x-api-key": process.env.TWELVELABS_API_KEY,
+				"Content-Type": "application/json",
+			},
+		};
+
+		const response = await fetch(url, options);
+    const json = await response.json();
+    return json;
+    
+    
+    
+}
+
+retrieveListIndex();
+
+module.exports = { createIndex, retrieveListIndex };
