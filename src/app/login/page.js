@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../backend/firebase/firebaseConfig"; // Correct the path if necessary
-import firebaseApp from '../../firebaseClient'; // Adjust the path as needed
 
 const Login = () => {
   const [email, setEmail] = useState('');
