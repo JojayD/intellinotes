@@ -1,5 +1,4 @@
 const { getChatGPTResponse } = require("../services/openaiService");
- 
 const getResponse = async (req, res) => {
 	const prompt = req.query.prompt;
 	try {
@@ -9,5 +8,15 @@ const getResponse = async (req, res) => {
 		res.status(500).json({ error: "Failed to get response from OpenAI" });
 	}
 };
+
+const getResponseCreateIndex = async (req, res) => {
+	const prompt = req.query.prompt;
+	try {
+		const response = await get(prompt);
+		res.json({ response });
+	} catch (error) {
+		res.status(500).json({ error: "Failed to get response from OpenAI" });
+	}
+}
 
 module.exports = { getResponse };
